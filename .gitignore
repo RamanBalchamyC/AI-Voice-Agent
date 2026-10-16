@@ -91,3 +91,4 @@ secrets/
 *.pem
 .env
 *.lock
+!uv.lock
