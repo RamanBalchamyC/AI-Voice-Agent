@@ -1,3 +1,4 @@
+from threading import Lock
 import asyncio
 from datetime import datetime
 
@@ -12,21 +13,43 @@ from langchain_agent.rag import retrieve, build_context
 
 
 # ---------------------------------------------------------------------------
-# Shared singletons — initialized once at import time
-# ---------------------------------------------------------------------------
+# Shared resources — initialized only when RAG search is first needed
 
-embedder = SentenceTransformer(settings.embedding_model)
-qdrant = QdrantClient(path=settings.qdrant_path)
+embedder = None
+qdrant = None
+_resources_lock = Lock()
 
-try:
-    _count = qdrant.get_collection(settings.collection_name).points_count
-    print(f"[OK] Connected to '{settings.collection_name}' — {_count} points")
-except Exception as exc:
-    raise RuntimeError(
-        f"Could not open Qdrant collection '{settings.collection_name}' "
-        f"at '{settings.qdrant_path}'. Did you run `python ingest.py` first?"
-    ) from exc
 
+def get_rag_resources():
+    global embedder, qdrant
+
+    with _resources_lock:
+        if embedder is None:
+            embedder = SentenceTransformer(settings.embedding_model)
+
+        if qdrant is None:
+            client = QdrantClient(path=settings.qdrant_path)
+
+            try:
+                count = client.get_collection(
+                    settings.collection_name
+                ).points_count
+                print(
+                    f"[OK] Connected to '{settings.collection_name}' "
+                    f"— {count} points"
+                )
+            except Exception as exc:
+                client.close()
+                raise RuntimeError(
+                    f"Could not open Qdrant collection "
+                    f"'{settings.collection_name}' at "
+                    f"'{settings.qdrant_path}'. "
+                    "Did you run `python ingest.py` first?"
+                ) from exc
+
+            qdrant = client
+
+    return qdrant, embedder
 
 # ---------------------------------------------------------------------------
 # Mock data
@@ -129,9 +152,13 @@ def search_plans(query: str) -> str:
     """Search Lauki Phones' plan database and documentation for information about
     data plans, pricing, validity, voice minutes, SMS limits, and benefits.
     Use this whenever the user asks about plans, pricing, or plan comparison."""
-    chunks = retrieve(qdrant, embedder, query, top_k=5)
+
+    client, model = get_rag_resources()
+    chunks = retrieve(client, model, query, top_k=5)
+
     if not chunks:
         return "No relevant information found in the documentation."
+
     return build_context(chunks)
 
 

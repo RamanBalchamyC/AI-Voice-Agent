@@ -62,7 +62,9 @@ htmlcov/
 *.db
 
 # Document Ingestion
-/data/
+/data/*
+!/data/qdrant/
+!/data/qdrant/**
 /downloads/
 *.pdf
 !docs/*.pdf
