@@ -14,13 +14,13 @@ export default function App() {
     <div className="app-shell" id="top">
       <Header />
       <main className="main-content">
-        <div className="eyebrow"><Sparkles size={14} /> YOUR PERSONAL AI</div>
+        <div className="eyebrow"><Sparkles size={14} /> LAUKI VOICE AGENT</div>
         <h1>A voice that’s<br /><span>ready to help.</span></h1>
-        <p className="intro">Have a natural conversation with your AI assistant.<br className="desktop-break" /> Just press start and speak normally.</p>
+        <p className="intro">Have a natural conversation with Lauki Voice Agent.<br className="desktop-break" /> Just press start and speak normally.</p>
 
         <section className="voice-card">
           <div className="assistant-avatar"><div className="avatar-inner"><Headphones size={30} /></div><span className={`avatar-orbit ${connected ? 'orbit-active' : ''}`} /></div>
-          <div className="assistant-name">Your AI assistant</div>
+          <div className="assistant-name">Lauki Voice Agent</div>
           <StatusIndicator status={voice.status} />
           <VoiceVisualizer active={connected} />
           <CallControls status={voice.status} isMuted={voice.isMuted} onStart={() => void voice.startCall()} onEnd={() => void voice.endCall()} onToggleMute={() => void voice.toggleMute()} />
