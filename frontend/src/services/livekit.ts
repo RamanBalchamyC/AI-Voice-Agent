@@ -1,7 +1,13 @@
 import { Room, RoomEvent, Track, type TranscriptionSegment } from 'livekit-client';
 import type { LiveKitTokenResponse } from '../types/voice';
 
-const TOKEN_ENDPOINT = import.meta.env.VITE_TOKEN_ENDPOINT ?? 'http://localhost:8000/api/livekit/token';
+const rawEndpoint = import.meta.env.VITE_TOKEN_ENDPOINT;
+
+// In local dev without custom env, fall back to localhost:8000.
+// In production (Vercel) or if pointing to localhost, route to the serverless /api/token.
+const TOKEN_ENDPOINT = import.meta.env.DEV
+  ? (rawEndpoint ?? 'http://localhost:8000/api/livekit/token')
+  : (rawEndpoint && !rawEndpoint.includes('localhost:8000') ? rawEndpoint : '/api/token');
 
 export async function fetchLiveKitCredentials(): Promise<{ serverUrl: string; token: string }> {
   const response = await fetch(TOKEN_ENDPOINT, {

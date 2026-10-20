@@ -6,7 +6,6 @@ from langchain.agents import create_agent
 from langchain_core.tools import tool
 from langchain_groq import ChatGroq
 from qdrant_client import QdrantClient
-from sentence_transformers import SentenceTransformer
 
 from config import settings
 from langchain_agent.rag import retrieve, build_context
@@ -25,6 +24,7 @@ def get_rag_resources():
 
     with _resources_lock:
         if embedder is None:
+            from sentence_transformers import SentenceTransformer
             embedder = SentenceTransformer(settings.embedding_model)
 
         if qdrant is None:
