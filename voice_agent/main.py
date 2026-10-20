@@ -43,7 +43,10 @@ class LaukiAgent(Agent):
         )
 
 
-server = AgentServer()
+server = AgentServer(
+    initialize_process_timeout=60.0,
+    num_idle_processes=1,
+)
 
 
 @server.rtc_session()

@@ -1,15 +1,15 @@
 import sys
+from typing import Any
 
 from langchain_groq import ChatGroq
 from qdrant_client import QdrantClient
-from sentence_transformers import SentenceTransformer
 
 from config import settings
 
 
 def retrieve(
     client: QdrantClient,
-    embedder: SentenceTransformer,
+    embedder: Any,
     query: str,
     top_k: int = 5,
 ) -> list[dict]:
@@ -45,6 +45,7 @@ def rag(query: str, top_k: int = 5, client=None, embedder=None):
         tuple: (answer_text, context_used)
     """
     if embedder is None:
+        from sentence_transformers import SentenceTransformer
         embedder = SentenceTransformer(settings.embedding_model)
     if client is None:
         client = QdrantClient(path=settings.qdrant_path)
